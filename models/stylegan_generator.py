@@ -625,38 +625,56 @@ class NoiseApplyingLayer(nn.Module):
         return x + noise * self.weight.view(1, -1, 1, 1)
 
 
-class StyleModLayer(nn.Module):
-    """Implements the style modulation layer."""
+if False:
+    class StyleModLayer(nn.Module):
+        """Implements the style modulation layer."""
 
-    def __init__(self,
-                 w_space_dim,
-                 out_channels,
-                 use_wscale=True):
-        super().__init__()
-        self.w_space_dim = w_space_dim
-        self.out_channels = out_channels
+        def __init__(self,
+                    w_space_dim,
+                    out_channels,
+                    use_wscale=True):
+            super().__init__()
+            self.normalize = InstanceNormLayer()
+            self.w_space_dim = w_space_dim
+            self.out_channels = out_channels
 
-        weight_shape = (self.out_channels * 2, self.w_space_dim)
-        wscale = _STYLEMOD_WSCALE_GAIN / np.sqrt(self.w_space_dim)
-        if use_wscale:
-            self.weight = nn.Parameter(torch.randn(*weight_shape))
-            self.wscale = wscale
-        else:
-            self.weight = nn.Parameter(torch.randn(*weight_shape) * wscale)
-            self.wscale = 1.0
+            weight_shape = (self.out_channels * 2, self.w_space_dim)
+            wscale = _STYLEMOD_WSCALE_GAIN / np.sqrt(self.w_space_dim)
+            if use_wscale:
+                self.weight = nn.Parameter(torch.randn(*weight_shape))
+                self.wscale = wscale
+            else:
+                self.weight = nn.Parameter(torch.randn(*weight_shape) * wscale)
+                self.wscale = 1.0
 
-        self.bias = nn.Parameter(torch.zeros(self.out_channels * 2))
+            self.bias = nn.Parameter(torch.zeros(self.out_channels * 2))
 
-    def forward(self, x, w):
-        if w.ndim != 2 or w.shape[1] != self.w_space_dim:
-            raise ValueError(f'The input tensor should be with shape '
-                             f'[batch_size, w_space_dim], where '
-                             f'`w_space_dim` equals to {self.w_space_dim}!\n'
-                             f'But `{w.shape}` is received!')
-        style = F.linear(w, weight=self.weight * self.wscale, bias=self.bias)
-        style_split = style.view(-1, 2, self.out_channels, 1, 1)
-        x = x * (style_split[:, 0] + 1) + style_split[:, 1]
-        return x, style
+        def forward(self, x, w):
+            x = self.normalize(x)
+            if w.ndim != 2 or w.shape[1] != self.w_space_dim:
+                raise ValueError(f'The input tensor should be with shape '
+                                f'[batch_size, w_space_dim], where '
+                                f'`w_space_dim` equals to {self.w_space_dim}!\n'
+                                f'But `{w.shape}` is received!')
+            style = F.linear(w, weight=self.weight * self.wscale, bias=self.bias)
+            style_split = style.view(-1, 2, self.out_channels, 1, 1)
+            x = x * (style_split[:, 0] + 1) + style_split[:, 1]
+            return x, style
+else:
+    import adaiw
+    
+    class BlockwiseAdaINAdapter(adaiw.BlockwiseAdaIN):
+        def __init__(_,
+                    w_space_dim,
+                    out_channels,
+                    use_wscale=True):
+            return super().__init__(w_space_dim, out_channels)
+
+        def forward(self, x, w):
+            y = super().forward(x, w)
+            return y, self.last_extracted_stat
+
+    StyleModLayer = BlockwiseAdaINAdapter
 
 
 class ConvBlock(nn.Module):
@@ -730,7 +748,7 @@ class ConvBlock(nn.Module):
 
         if self.position != 'last':
             self.apply_noise = NoiseApplyingLayer(resolution, out_channels)
-            self.normalize = InstanceNormLayer()
+            print(StyleModLayer.__name__)
             self.style = StyleModLayer(w_space_dim, out_channels, use_wscale)
 
         if self.position == 'const_init':
@@ -800,7 +818,7 @@ class ConvBlock(nn.Module):
         if bias is not None:
             x = x + bias.view(1, -1, 1, 1)
         x = self.activate(x)
-        x = self.normalize(x)
+        # x = self.normalize(x)
         x, style = self.style(x, w)
         return x, style
 
