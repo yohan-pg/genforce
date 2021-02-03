@@ -25,3 +25,4 @@
 - train with block size 1 compared to adain (does the MLP make a difference?)
 - bug d'affichage?
 - shared params for style to mean and style to cov
+- relu in MLP
