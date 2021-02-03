@@ -662,19 +662,45 @@ if False:
             return x, style
 else:
     import adaiw
-    
-    class BlockwiseAdaINAdapter(adaiw.BlockwiseAdaIN):
-        def __init__(_,
-                    w_space_dim,
-                    out_channels,
-                    use_wscale=True):
-            return super().__init__(w_space_dim, out_channels)
 
-        def forward(self, x, w):
-            y = super().forward(x, w)
-            return y, self.last_extracted_stat
+    from dataclasses import dataclass
+    from typing import Type
 
-    StyleModLayer = BlockwiseAdaINAdapter
+    def uncenter(normalizer_type):
+        @dataclass
+        class UncenteredNormalizer(normalizer_type):
+            centered: bool = False
+        return UncenteredNormalizer
+
+    if True:
+        class BlockwiseAdaINAdapter(adaiw.BlockwiseAdaIN):
+            def __init__(self,
+                        w_space_dim,
+                        out_channels,
+                        use_wscale=True):
+                print("params", w_space_dim, out_channels)
+                super().__init__(w_space_dim, out_channels, block_size=64, normalizer_type = uncenter(self.normalizer_type), shift_mean=True)
+                print(self.block_size)
+                print(self.normalizer)
+
+            def forward(self, x, w):
+                y = super().forward(x, w)
+                return y, self.last_projected_style
+
+        StyleModLayer = BlockwiseAdaINAdapter
+    else:
+        class AdaINAdapter(adaiw.AdaIN):
+            def __init__(self,
+                        w_space_dim,
+                        out_channels,
+                        use_wscale=True):
+                super().__init__(w_space_dim, out_channels, normalizer_type=uncenter(self.normalizer_type), shift_mean=True)
+
+            def forward(self, x, w):
+                y = super().forward(x, w)
+                return y, self.last_projected_style
+
+        StyleModLayer = AdaINAdapter
 
 
 class ConvBlock(nn.Module):
