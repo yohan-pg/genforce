@@ -103,9 +103,11 @@ def main():
     print(f'Loading checkpoint from `{checkpoint_path}` ...')
     if not os.path.exists(checkpoint_path):
         print(f'  Downloading checkpoint from `{url}` ...')
-        subprocess.call(['wget', '--quiet', '-O', checkpoint_path, url])
+        subprocess.call(['wget', '-O', checkpoint_path, url])
         print(f'  Finish downloading checkpoint.')
     checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    if 'models' in checkpoint:
+        checkpoint = checkpoint['models']
     if 'generator_smooth' in checkpoint:
         generator.load_state_dict(checkpoint['generator_smooth'])
     else:

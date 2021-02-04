@@ -679,7 +679,7 @@ else:
                         out_channels,
                         use_wscale=True):
                 print("params", w_space_dim, out_channels)
-                super().__init__(w_space_dim, out_channels, block_size=64, normalizer_type = uncenter(self.normalizer_type), shift_mean=True)
+                super().__init__(w_space_dim, out_channels, block_size=64, shift_mean=True, projection_type=adaiw.AffineProjection)
                 print(self.block_size)
                 print(self.normalizer)
 
@@ -694,7 +694,7 @@ else:
                         w_space_dim,
                         out_channels,
                         use_wscale=True):
-                super().__init__(w_space_dim, out_channels, normalizer_type=uncenter(self.normalizer_type), shift_mean=True)
+                super().__init__(w_space_dim, out_channels, shift_mean=True)
 
             def forward(self, x, w):
                 y = super().forward(x, w)

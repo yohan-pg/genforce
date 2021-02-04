@@ -46,17 +46,15 @@ class IterDataLoader(object):
         dist_sampler = DistributedSampler(self._dataset,
                                           shuffle=self.shuffle,
                                           current_iter=self._iter,
-                                          repeat=self.repeat)
+                                          repeat=self.repeat) 
 
         self._dataloader = DataLoader(self._dataset,
                                       batch_size=self.batch_size,
                                       shuffle=(dist_sampler is None),
                                       num_workers=self.num_workers,
                                       drop_last=self.shuffle,
-                                      pin_memory=True,
-                                      sampler=dist_sampler)
+                                      pin_memory=True) 
         self.iter_loader = iter(self._dataloader)
-
 
     def overwrite_param(self, batch_size=None, resolution=None):
         """Overwrites some parameters for progressive training."""
@@ -99,6 +97,17 @@ class IterDataLoader(object):
 
     def __len__(self):
         return len(self._dataloader)
+
+
+class LocalIterDataloader(IterDataLoader):
+    def build_dataloader(self):
+        """Builds data loader without all the distributed stuff."""
+        self._dataloader = DataLoader(self._dataset,
+                                      batch_size=self.batch_size,
+                                      num_workers=self.num_workers,
+                                      drop_last=self.shuffle,
+                                      pin_memory=True) 
+        self.iter_loader = iter(self._dataloader)
 
 
 def dataloader_test(root_dir, test_num=10):

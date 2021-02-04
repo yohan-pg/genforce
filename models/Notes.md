@@ -12,7 +12,7 @@
 - Blur after upsample to reduce upsampling artifacts following nearest upsampling instead of a better interpolation or whatever.
 - Const init to ones.
 - Fused scale: choice between conv2d transpose or upsample. They start using it after a certain resolution
-- In the anime example, progan does no appear to be used
+- In the anime example, not usre how progressive growth goes. 
 
 
 # Debugging
@@ -26,3 +26,16 @@
 - bug d'affichage?
 - shared params for style to mean and style to cov
 - relu in MLP
+
+
+
+
+# Experiments todo
+
+√ Blocksize 1/64 Affine
+
+- Blocksize 64 512 MLP
+
+- Baseline longer train
+- Blocksize ? ? MLP + longer training
+- Blocksize ? Affine + longer training

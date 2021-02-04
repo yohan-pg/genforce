@@ -2,6 +2,6 @@
 """Collects datasets and data loaders."""
 
 from .datasets import BaseDataset
-from .dataloaders import IterDataLoader
+from .dataloaders import IterDataLoader, LocalIterDataloader
 
-__all__ = ['BaseDataset', 'IterDataLoader']
+__all__ = ['BaseDataset', 'IterDataLoader', 'LocalIterDataloader']
