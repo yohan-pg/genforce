@@ -46,14 +46,15 @@ class IterDataLoader(object):
         dist_sampler = DistributedSampler(self._dataset,
                                           shuffle=self.shuffle,
                                           current_iter=self._iter,
-                                          repeat=self.repeat) 
+                                          repeat=self.repeat)
 
         self._dataloader = DataLoader(self._dataset,
                                       batch_size=self.batch_size,
                                       shuffle=(dist_sampler is None),
                                       num_workers=self.num_workers,
                                       drop_last=self.shuffle,
-                                      pin_memory=True) 
+                                      pin_memory=True,
+                                      sampler=dist_sampler)
         self.iter_loader = iter(self._dataloader)
 
     def overwrite_param(self, batch_size=None, resolution=None):

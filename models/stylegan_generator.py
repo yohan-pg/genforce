@@ -672,7 +672,7 @@ else:
             centered: bool = False
         return UncenteredNormalizer
 
-    if True:
+    if False:
         class BlockwiseAdaINAdapter(adaiw.BlockwiseAdaIN):
             def __init__(self,
                         w_space_dim,
