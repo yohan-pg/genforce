@@ -32,7 +32,7 @@ controllers = dict(
     ),
     Snapshoter=dict(every_n_iters=500, first_iter=True, num=200),
     FIDEvaluator=dict(every_n_iters=5000, first_iter=True, num=50000),
-    Checkpointer=dict(every_n_iters=5000, first_iter=True),
+    Checkpointer=dict(every_n_iters=25000, first_iter=True),
 )
 
 modules = dict(

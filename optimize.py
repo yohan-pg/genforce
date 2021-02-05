@@ -11,6 +11,8 @@ import torch
 import torch.nn as nn 
 import time 
 from typing import List, Tuple
+import math
+import pickle
 
 from models import MODEL_ZOO
 from models import build_generator
@@ -19,7 +21,7 @@ from utils.visualizer import HtmlPageVisualizer
 # from utils.visualizer import save_image
 from torchvision.utils import save_image
 
-from adaiw import AdaIN, Statistic
+from adaiw import AdaIN
 
 def parse_args():
     """Parses arguments."""
@@ -54,6 +56,7 @@ def parse_args():
     parser.add_argument('--max_seconds', type=float, default=60.0,
                         help='How long to optimize for '
                              '(default: %(default)s)')
+    parser.add_argument('--num_steps', type=int, default=10)
     return parser.parse_args()
 
 args = parse_args()
@@ -91,8 +94,6 @@ def optimize(
     losses = []
     pred = None
 
-    save_image(target, os.path.join(work_dir, f'target.png'))
-
     i = 0
     while time.time() - start < args.max_seconds:
         i += 1
@@ -103,8 +104,8 @@ def optimize(
         print(loss.item())
         loss.backward()
         optimizer.step()
-        if i % 30 == 0:
-            save_image(pred, os.path.join(work_dir, f'result_{i}.png'))
+
+    save_image(pred, os.path.join(work_dir, f'result_{round(lr.item(), 5)}.png'))
         
     return stats, losses
 
@@ -151,14 +152,23 @@ torch.manual_seed(args.seed)
 
 generator = load_generator_from_checkpoint()
 work_dir = create_working_directory()
-targets = sample_batch()
+target = sample_batch()
 
 z = torch.randn(args.batch_size, generator.z_space_dim).cuda()
 
 with torch.no_grad():
-    images = postprocess(generator(z, trunc_psi=args.trunc_psi,
+    init = postprocess(generator(z, trunc_psi=args.trunc_psi,
                                 trunc_layers=args.trunc_layers,
                                 randomize_noise=args.randomize_noise)['image'])
+    save_image(target, os.path.join(work_dir, f'target.png'))
+    save_image(init, os.path.join(work_dir, f'init.png'))
 
-with AdaIN.optimize_stats(generator) as stats:
-    optimize(generator, z, targets, stats, lr=0.05)
+lrs = torch.logspace(math.log(0.001), math.log(0.5), args.num_steps, base=math.e)
+results = {}
+for lr in lrs:
+    print("LR:", lr)
+    with AdaIN.optimizable_stats(generator) as stats:
+        results[lr] = optimize(generator, z, target, stats, lr=lr)[1]
+    print()
+
+pickle.dump(results, open(os.path.join(work_dir, f'results.pkl'), "wb"))

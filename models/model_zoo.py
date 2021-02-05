@@ -303,6 +303,11 @@ MODEL_ZOO = {
         resolution=64,
         url=None
     ),
+    'demo_std': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
 }
 
 # pylint: enable=line-too-long

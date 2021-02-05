@@ -672,15 +672,15 @@ else:
             centered: bool = False
         return UncenteredNormalizer
 
-    if False:
+    if True:
         class BlockwiseAdaINAdapter(adaiw.BlockwiseAdaIN):
             def __init__(self,
                         w_space_dim,
                         out_channels,
                         use_wscale=True):
                 print("params", w_space_dim, out_channels)
-                super().__init__(w_space_dim, out_channels, block_size=64, shift_mean=True, projection_type=adaiw.AffineProjection)
-                print(self.block_size)
+                super().__init__(w_space_dim, out_channels, block_size=32, shift_mean=True, projection_type=adaiw.AffineProjection)
+                print(self.block_size)  
                 print(self.normalizer)
 
             def forward(self, x, w):
@@ -688,6 +688,21 @@ else:
                 return y, self.last_projected_style
 
         StyleModLayer = BlockwiseAdaINAdapter
+
+        # class OrthoAdaINAdapter(adaiw.OrthogonalWhiteningAdaIN):
+        #     def __init__(self,
+        #                 w_space_dim,
+        #                 out_channels,
+        #                 use_wscale=True):
+        #         print("params", w_space_dim, out_channels)
+        #         super().__init__(w_space_dim, out_channels, shift_mean=True, projection_type=adaiw.AffineProjection)
+        #         print(self.normalizer)
+
+        #     def forward(self, x, w):
+        #         y = super().forward(x, w)
+        #         return y, self.last_projected_style
+
+        # StyleModLayer = OrthoAdaINAdapter
     else:
         class AdaINAdapter(adaiw.AdaIN):
             def __init__(self,
