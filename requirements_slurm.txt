@@ -1,0 +1,8 @@
+scipy
+opencv-python
+bs4
+lmdb
+tensorboard
+tqdm
+rich
+easydict
