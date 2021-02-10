@@ -19,9 +19,9 @@ data = dict(
     repeat=500,
     # train=dict(root_dir='data/ffhq', resolution=resolution, mirror=0.5),
     # val=dict(root_dir='data/ffhq', resolution=resolution),
-    train=dict(root_dir='/home-local2/yopog.extra.nobkp/lsun/church_outdoor_train_lmdb', data_format='lmdb',
+    train=dict(root_dir='data/lsun/church_outdoor_train_lmdb', data_format='lmdb',
                resolution=resolution, mirror=0.5, crop_resize_resolution=256),
-    val=dict(root_dir='/home-local2/yopog.extra.nobkp/lsun/church_outdoor_train_lmdb', data_format='lmdb',
+    val=dict(root_dir='data/lsun/church_outdoor_train_lmdb', data_format='lmdb',
              resolution=resolution, crop_resize_resolution=256),
 )
 
