@@ -272,3 +272,53 @@ class BaseGANRunner(BaseRunner):
 
         fid_value = compute_fid(fake_features, real_features)
         return fid_value
+
+    def lpips(self,
+            lpips_num,
+            z=None,
+            ignore_cache=False,
+            align_tf=True):
+        """Computes the FID metric."""
+        self.set_mode('val')
+
+        if self.val_loader is None:
+            self.build_dataset('val')
+        lpips_num = min(lpips_num, len(self.val_loader.dataset))
+
+        if z is not None:
+            assert isinstance(z, np.ndarray)
+            assert z.ndim == 2 and z.shape[1] == self.z_space_dim
+            lpips_num = min(lpips_num, z.shape[0])
+            z = torch.from_numpy(z).type(torch.FloatTensor)
+        if not lpips_num:
+            return -1
+
+        indices = list(range(self.rank, lpips_num, self.world_size))
+
+        self.logger.init_pbar()
+
+        # Extract features from fake images.
+        fake_image_list = []
+        task1 = self.logger.add_pbar_task('LPIPS images', total=lpips_num)
+        for batch_idx in range(0, len(indices), self.val_batch_size):
+            sub_indices = indices[batch_idx:batch_idx + self.val_batch_size]
+            batch_size = len(sub_indices)
+            if z is None:
+                code = torch.randn(batch_size, self.z_space_dim).cuda()
+            else:
+                code = z[sub_indices].cuda()
+            with torch.no_grad():
+                if 'generator_smooth' in self.models:
+                    G = self.models['generator_smooth']
+                else:
+                    G = self.models['generator']
+                fake_images = G(code)['image']
+                fake_image_list.append(fake_images)
+            self.logger.update_pbar(task1, batch_size * self.world_size)
+
+        dist.barrier()
+        if self.rank != 0:
+            return -1
+        self.logger.close_pbar()
+
+        return compute_fid(fake_features, real_features)
