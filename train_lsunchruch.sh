@@ -2,7 +2,7 @@
 
 source $HOME/genforce-env/bin/activate
 
-GPUS=1
-CONFIG=configs/stylegan_lsunbedroom256.py
-WORK_DIR=work_dirs/stylegan_lsunbedroom256_train
+GPUS=2
+CONFIG=configs/stylegan_lsunchruch256.py
+WORK_DIR=work_dirs/stylegan_lsunchruch256_train
 ./scripts/dist_train.sh ${GPUS} ${CONFIG} ${WORK_DIR}
