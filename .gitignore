@@ -30,3 +30,5 @@ events.*
 *.pkl
 *.h5
 *.dat
+
+/core.*
