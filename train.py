@@ -5,7 +5,6 @@ import os.path
 import shutil
 import warnings
 import random
-import argparse
 import numpy as np
 
 import torch
@@ -16,41 +15,10 @@ from utils.logger import build_logger
 from utils.misc import init_dist
 from utils.misc import DictAction, parse_config, update_config
 
-
-def parse_args():
-    """Parses arguments."""
-    parser = argparse.ArgumentParser(description='Run model training.')
-    parser.add_argument('config', type=str,
-                        help='Path to the training configuration.')
-    parser.add_argument('--work_dir', type=str, required=True,
-                        help='The work directory to save logs and checkpoints.')
-    parser.add_argument('--resume_path', type=str, default=None,
-                        help='Path to the checkpoint to resume training.')
-    parser.add_argument('--weight_path', type=str, default=None,
-                        help='Path to the checkpoint to load model weights, '
-                             'but not resume other states.')
-    parser.add_argument('--seed', type=int, default=None,
-                        help='Random seed. (default: %(default)s)')
-    parser.add_argument('--launcher', type=str, default='pytorch',
-                        choices=['pytorch', 'slurm'],
-                        help='Launcher type. (default: %(default)s)')
-    parser.add_argument('--backend', type=str, default='nccl',
-                        help='Backend for distributed launcher. (default: '
-                             '%(default)s)')
-    parser.add_argument('--rank', type=int, default=-1,
-                        help='Node rank for distributed running. (default: '
-                             '%(default)s)')
-    parser.add_argument('--local_rank', type=int, default=0,
-                        help='Rank of the current node. (default: %(default)s)')
-    parser.add_argument('--options', nargs='+', action=DictAction,
-                        help='arguments in dict')
-    return parser.parse_args()
-
+from models.args import args
 
 def main():
     """Main function."""
-    # Parse arguments.
-    args = parse_args()
 
     # Parse configurations.
     config = parse_config(args.config)

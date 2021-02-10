@@ -12,6 +12,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .args import args
+from .adain import AdaIN
+
 from .sync_op import all_gather
 
 __all__ = ['StyleGANGenerator']
@@ -30,7 +33,6 @@ _AUTO_FUSED_SCALE_MIN_RES = 128
 
 # Default gain factor for weight scaling.
 _WSCALE_GAIN = np.sqrt(2.0)
-_STYLEMOD_WSCALE_GAIN = 1.0
 
 
 class StyleGANGenerator(nn.Module):
@@ -522,24 +524,6 @@ class PixelNormLayer(nn.Module):
         return x / norm
 
 
-class InstanceNormLayer(nn.Module):
-    """Implements instance normalization layer."""
-
-    def __init__(self, epsilon=1e-8):
-        super().__init__()
-        self.eps = epsilon
-
-    def forward(self, x):
-        if x.ndim != 4:
-            raise ValueError(f'The input tensor should be with shape '
-                             f'[batch_size, channel, height, width], '
-                             f'but `{x.shape}` is received!')
-        x = x - torch.mean(x, dim=[2, 3], keepdim=True)
-        norm = torch.sqrt(
-            torch.mean(x ** 2, dim=[2, 3], keepdim=True) + self.eps)
-        return x / norm
-
-
 class UpsamplingLayer(nn.Module):
     """Implements the upsampling layer.
 
@@ -624,99 +608,6 @@ class NoiseApplyingLayer(nn.Module):
         return x + noise * self.weight.view(1, -1, 1, 1)
 
 
-if False:
-    class StyleModLayer(nn.Module):
-        """Implements the style modulation layer."""
-
-        def __init__(self,
-                    w_space_dim,
-                    out_channels,
-                    use_wscale=True):
-            super().__init__()
-            self.normalize = InstanceNormLayer()
-            self.w_space_dim = w_space_dim
-            self.out_channels = out_channels
-
-            weight_shape = (self.out_channels * 2, self.w_space_dim)
-            wscale = _STYLEMOD_WSCALE_GAIN / np.sqrt(self.w_space_dim)
-            if use_wscale:
-                self.weight = nn.Parameter(torch.randn(*weight_shape))
-                self.wscale = wscale
-            else:
-                self.weight = nn.Parameter(torch.randn(*weight_shape) * wscale)
-                self.wscale = 1.0
-
-            self.bias = nn.Parameter(torch.zeros(self.out_channels * 2))
-
-        def forward(self, x, w):
-            x = self.normalize(x)
-            if w.ndim != 2 or w.shape[1] != self.w_space_dim:
-                raise ValueError(f'The input tensor should be with shape '
-                                f'[batch_size, w_space_dim], where '
-                                f'`w_space_dim` equals to {self.w_space_dim}!\n'
-                                f'But `{w.shape}` is received!')
-            style = F.linear(w, weight=self.weight * self.wscale, bias=self.bias)
-            style_split = style.view(-1, 2, self.out_channels, 1, 1)
-            x = x * (style_split[:, 0] + 1) + style_split[:, 1]
-            return x, style
-else:
-    import adaiw
-
-    from dataclasses import dataclass
-    from typing import Type
-
-    def uncenter(normalizer_type):
-        @dataclass
-        class UncenteredNormalizer(normalizer_type):
-            centered: bool = False
-        return UncenteredNormalizer
-
-    if True:
-        class BlockwiseAdaINAdapter(adaiw.BlockwiseAdaIN):
-            def __init__(self,
-                        w_space_dim,
-                        out_channels,
-                        use_wscale=True):
-                print("params", w_space_dim, out_channels)
-                super().__init__(w_space_dim, out_channels, block_size=64, shift_mean=True, projection_type=adaiw.AffineProjection)
-                print(self.block_size)
-                print(self.normalizer)
-
-            def forward(self, x, w):
-                y = super().forward(x, w)
-                return y, self.last_projected_style
-
-        StyleModLayer = BlockwiseAdaINAdapter
-
-        # class OrthoAdaINAdapter(adaiw.OrthogonalWhiteningAdaIN):
-        #     def __init__(self,
-        #                 w_space_dim,
-        #                 out_channels,
-        #                 use_wscale=True):
-        #         print("params", w_space_dim, out_channels)
-        #         super().__init__(w_space_dim, out_channels, shift_mean=True, projection_type=adaiw.AffineProjection)
-        #         print(self.normalizer)
-
-        #     def forward(self, x, w):
-        #         y = super().forward(x, w)
-        #         return y, self.last_projected_style
-
-        # StyleModLayer = OrthoAdaINAdapter
-    else:
-        class AdaINAdapter(adaiw.AdaIN):
-            def __init__(self,
-                        w_space_dim,
-                        out_channels,
-                        use_wscale=True):
-                super().__init__(w_space_dim, out_channels, shift_mean=True)
-
-            def forward(self, x, w):
-                y = super().forward(x, w)
-                return y, self.last_projected_style
-
-        StyleModLayer = AdaINAdapter
-
-
 class ConvBlock(nn.Module):
     """Implements the normal convolutional block.
 
@@ -788,8 +679,9 @@ class ConvBlock(nn.Module):
 
         if self.position != 'last':
             self.apply_noise = NoiseApplyingLayer(resolution, out_channels)
-            print(StyleModLayer.__name__)
-            self.style = StyleModLayer(w_space_dim, out_channels, use_wscale)
+            adain_type = {cls.__name__: cls for cls in AdaIN.__subclasses__()}[args.adain_type]
+            print(adain_type.__name__)
+            self.style = adain_type(w_space_dim, out_channels, use_wscale)
 
         if self.position == 'const_init':
             self.const = nn.Parameter(
