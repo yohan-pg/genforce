@@ -91,14 +91,13 @@ class StyleGANGenerator(nn.Module):
                 is not supported.
         """
         super().__init__()
-
         if resolution not in _RESOLUTIONS_ALLOWED:
             raise ValueError(f'Invalid resolution: `{resolution}`!\n'
                              f'Resolutions allowed: {_RESOLUTIONS_ALLOWED}.')
         if fused_scale not in _FUSED_SCALE_ALLOWED:
             raise ValueError(f'Invalid fused-scale option: `{fused_scale}`!\n'
                              f'Options allowed: {_FUSED_SCALE_ALLOWED}.')
-
+        print(w_space_dim)
         self.init_res = _INIT_RES
         self.resolution = resolution
         self.z_space_dim = z_space_dim
@@ -680,7 +679,7 @@ else:
                         use_wscale=True):
                 print("params", w_space_dim, out_channels)
                 super().__init__(w_space_dim, out_channels, block_size=64, shift_mean=True, projection_type=adaiw.AffineProjection)
-                print(self.block_size)  
+                print(self.block_size)
                 print(self.normalizer)
 
             def forward(self, x, w):

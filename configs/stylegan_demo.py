@@ -10,7 +10,10 @@ gan_type = 'stylegan'
 resolution = 64
 batch_size = 4
 val_batch_size = 32
-total_img = 200_000
+total_img = 400_000
+z_space_dim = 512
+w_space_dim = 512
+
 
 # Training dataset is repeated at the beginning to avoid loading dataset
 # repeatedly at the end of each epoch. This can save some I/O time.
@@ -30,9 +33,9 @@ controllers = dict(
         lod_training_img=5_000, lod_transition_img=5_000,
         batch_size_schedule=dict(res4=64, res8=32, res16=16, res32=8),
     ),
-    Snapshoter=dict(every_n_iters=500, first_iter=True, num=200),
+    Snapshoter=dict(every_n_iters=1000, first_iter=True, num=200),
     FIDEvaluator=dict(every_n_iters=5000, first_iter=True, num=50000),
-    Checkpointer=dict(every_n_iters=25000, first_iter=True),
+    Checkpointer=dict(every_n_iters=50000, first_iter=True),
 )
 
 modules = dict(
@@ -44,7 +47,7 @@ modules = dict(
         kwargs_val=dict(),
     ),
     generator=dict(
-        model=dict(gan_type=gan_type, resolution=resolution),
+        model=dict(gan_type=gan_type, resolution=resolution, z_space_dim=z_space_dim,w_space_dim=w_space_dim),
         lr=dict(lr_type='FIXED'),
         opt=dict(opt_type='Adam', base_lr=1e-3, betas=(0.0, 0.99)),
         kwargs_train=dict(w_moving_decay=0.995, style_mixing_prob=0.9,
