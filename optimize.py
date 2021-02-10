@@ -53,7 +53,7 @@ def parse_args():
                         help='Whether to randomize the layer-wise noise. This '
                              'is particularly applicable to StyleGAN (v1/v2). '
                              '(default: %(default)s)')
-    parser.add_argument('--max_seconds', type=float, default=60.0,
+    parser.add_argument('--max_seconds', type=float, default=2.0,
                         help='How long to optimize for '
                              '(default: %(default)s)')
     parser.add_argument('--num_steps', type=int, default=10)
@@ -118,7 +118,7 @@ def create_working_directory() -> str:
     if args.save_dir:
         work_dir = args.save_dir
     else:
-        work_dir = os.path.join('work_dirs', 'optimize')
+        work_dir = os.path.join('work_dirs', 'optimize_' + args.model_name)
     os.makedirs(work_dir, exist_ok=True)
     return work_dir
 

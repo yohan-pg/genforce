@@ -308,6 +308,46 @@ MODEL_ZOO = {
         resolution=64,
         url=None
     ),
+    'demo_32': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
+    'demo_16': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
+    'demo_8': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
+    'demo_4': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
+    'demo_2': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
+    'demo_1': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
+    'demo_64_2s': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
+    'demo_std_2s': dict(
+        gan_type='stylegan',
+        resolution=64,
+        url=None
+    ),
 }
 
 # pylint: enable=line-too-long

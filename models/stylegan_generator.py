@@ -679,7 +679,7 @@ else:
                         out_channels,
                         use_wscale=True):
                 print("params", w_space_dim, out_channels)
-                super().__init__(w_space_dim, out_channels, block_size=32, shift_mean=True, projection_type=adaiw.AffineProjection)
+                super().__init__(w_space_dim, out_channels, block_size=64, shift_mean=True, projection_type=adaiw.AffineProjection)
                 print(self.block_size)  
                 print(self.normalizer)
 

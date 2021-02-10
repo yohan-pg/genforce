@@ -5,6 +5,9 @@ __pycache__/
 /.idea/
 *.sw[pon]
 
+
+/_cache_*
+
 /data/
 /work_dirs/
 *.jpg
