@@ -1,5 +1,5 @@
 # python3.7
-"""Configuration for training StyleGAN on LSUN (256) dataset.
+"""Configuration for training StyleGAN on LSUN Churches dataset containing 126 000 iamges.
 
 All settings are particularly used for one replica (GPU), such as `batch_size`
 and `num_workers`.
