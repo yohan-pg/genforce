@@ -1,5 +1,5 @@
 # python3.7
-"""Configuration for training StyleGAN on LSUN Churches dataset containing 126 000 iamges.
+"""Configuration for training StyleGAN on LSUN bedrooms dataset containing 3,033,042 images.
 
 All settings are particularly used for one replica (GPU), such as `batch_size`
 and `num_workers`.
@@ -10,16 +10,16 @@ gan_type = 'stylegan'
 resolution = 256
 batch_size = 4
 val_batch_size = 64
-total_img = 30_000_000
+total_img = 70_000_000
 
 # Training dataset is repeated at the beginning to avoid loading dataset
 # repeatedly at the end of each epoch. This can save some I/O time.
 data = dict(
     num_workers=4,
-    repeat=239,
-    train=dict(root_dir='data/lsun/church_outdoor_train_lmdb', data_format='lmdb',
+    repeat=24,
+    train=dict(root_dir='data/lsun/bedroom_train_lmdb', data_format='lmdb',
                resolution=resolution, mirror=0.5, crop_resize_resolution=256),
-    val=dict(root_dir='data/lsun/church_outdoor_train_lmdb', data_format='lmdb',
+    val=dict(root_dir='data/lsun/bedroom_train_lmdb', data_format='lmdb',
              resolution=resolution, crop_resize_resolution=256),
 )
 

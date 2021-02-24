@@ -10,15 +10,13 @@ gan_type = 'stylegan'
 resolution = 256
 batch_size = 4
 val_batch_size = 64
-total_img = 5_000_000
+total_img = 46_000_000
 
 # Training dataset is repeated at the beginning to avoid loading dataset
 # repeatedly at the end of each epoch. This can save some I/O time.
 data = dict(
     num_workers=4,
-    repeat=20,
-    # train=dict(root_dir='data/ffhq', resolution=resolution, mirror=0.5),
-    # val=dict(root_dir='data/ffhq', resolution=resolution),
+    repeat=10,
     train=dict(root_dir='data/lsun/car', data_format='lmdb',
                resolution=resolution, mirror=0.5, crop_resize_resolution=256),
     val=dict(root_dir='data/lsun/car', data_format='lmdb',

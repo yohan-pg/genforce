@@ -74,14 +74,14 @@ class BlockwiseAdaIN(adaiw.BlockwiseAdaIN, AdaIN):
                 out_channels,
                 use_wscale=True):
         print("params", w_space_dim, out_channels)
-        super().__init__(w_space_dim, out_channels, block_size=args.block_size, shift_mean=True, projection_type=adaiw.AffineProjection)
+        super().__init__(w_space_dim, out_channels, block_size=args.block_size, shift_mean=True)
         print(self.block_size)
         print(self.normalizer)
 
     def forward(self, x, w):
         y = super().forward(x, w)
         return y, self.last_projected_style
-        
+
 class StandardizationAdaIN(adaiw.AdaIN, AdaIN):
     def __init__(self,
                 w_space_dim,
