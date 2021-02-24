@@ -10,10 +10,7 @@
 module load python/3.7
 source $HOME/genforce-env/bin/activate
 
-export MKL_NUM_THREADS=1
-export OMP_NUM_THREADS=8
-
 GPUS=4
-CONFIG=configs/stylegan_lsunchurch256.py
-WORK_DIR=work_dirs/stylegan_lsunchurch256_train
+CONFIG=configs/stylegan_lsuncar256.py
+WORK_DIR=work_dirs/stylegan_lsuncar256_train
 ./scripts/dist_train.sh ${GPUS} ${CONFIG} ${WORK_DIR} --adain_type BlockwiseAdaIN

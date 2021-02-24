@@ -1,5 +1,5 @@
 # python3.7
-"""Configuration for training StyleGAN on LSUN Churches dataset containing 126 000 iamges.
+"""Configuration for training StyleGAN on LSUN cars dataset containing 5 520 753 images.
 
 All settings are particularly used for one replica (GPU), such as `batch_size`
 and `num_workers`.
@@ -16,12 +16,12 @@ total_img = 5_000_000
 # repeatedly at the end of each epoch. This can save some I/O time.
 data = dict(
     num_workers=4,
-    repeat=50,
+    repeat=20,
     # train=dict(root_dir='data/ffhq', resolution=resolution, mirror=0.5),
     # val=dict(root_dir='data/ffhq', resolution=resolution),
-    train=dict(root_dir='data/lsun/church_outdoor_train_lmdb', data_format='lmdb',
+    train=dict(root_dir='data/lsun/car', data_format='lmdb',
                resolution=resolution, mirror=0.5, crop_resize_resolution=256),
-    val=dict(root_dir='data/lsun/church_outdoor_train_lmdb', data_format='lmdb',
+    val=dict(root_dir='data/lsun/car', data_format='lmdb',
              resolution=resolution, crop_resize_resolution=256),
 )
 
@@ -32,9 +32,9 @@ controllers = dict(
         lod_training_img=600_000, lod_transition_img=600_000,
         batch_size_schedule=dict(res4=64, res8=32, res16=16, res32=8),
     ),
-    # Snapshoter=dict(every_n_iters=50000, first_iter=True, num=200),
-    # # FIDEvaluator=dict(every_n_iters=50000, first_iter=True, num=50000),
-    # Checkpointer=dict(every_n_iters=100000, first_iter=True),
+    Snapshoter=dict(every_n_iters=50000, first_iter=True, num=200),
+    FIDEvaluator=dict(every_n_iters=50000, first_iter=True, num=50000),
+    Checkpointer=dict(every_n_iters=100000, first_iter=True),
 )
 
 modules = dict(
