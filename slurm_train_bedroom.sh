@@ -12,10 +12,10 @@
 
 DATASET=lsunbedroom256
 CONFIG="configs/stylegan_${DATASET}.py"
-WORK_DIR="work_dirs/stylegan_${DATASET}_train"
 
 OPTIONS=(StyleModLayer StandardizationAdaIN BlockwiseAdaIN)
 ADAIN="${OPTIONS[$SLURM_ARRAY_TASK_ID]}"
+WORK_DIR="work_dirs/stylegan_${DATASET}_train_${ADAIN}"
 echo "🚀 $ADAIN"
 
 module load python/3.7
