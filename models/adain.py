@@ -74,7 +74,7 @@ class BlockwiseAdaIN(adaiw.BlockwiseAdaIN, AdaIN):
                 out_channels,
                 use_wscale=True):
         print("params", w_space_dim, out_channels)
-        super().__init__(w_space_dim, out_channels, block_size=args.block_size, shift_mean=True)
+        super().__init__(w_space_dim, out_channels, block_size=args.block_size, shift_mean=True, projection_type=adaiw.AffineProjection)
         print(self.block_size)
         print(self.normalizer)
 

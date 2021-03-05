@@ -26,7 +26,7 @@ parser.add_argument('--local_rank', type=int, default=0,
                     help='Rank of the current node. (default: %(default)s)')
 
 parser.add_argument('--adain_type', type=str, 
-                    help='type of adain normalization')
+                    help='type of adain normalization', default='StyleModLayer')
 parser.add_argument('--block_size', type=int, default=64, 
                     help='block size if whitening is used')
 
